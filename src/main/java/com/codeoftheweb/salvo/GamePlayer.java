@@ -1,10 +1,11 @@
 package com.codeoftheweb.salvo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.util.*;
 
 @Entity
 public class GamePlayer {
@@ -20,6 +21,10 @@ public class GamePlayer {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="game_id")
     private Game game;
+
+
+    @OneToMany(mappedBy="gamePlayer", fetch=FetchType.EAGER)
+    private Set<Ship> ships;
 
     private Date joinDate;
 
@@ -46,14 +51,31 @@ public class GamePlayer {
         this.game = game;
     }
 
+    public Date getJoinDate(){
+        return this.joinDate;
+    }
     public void setJoinDate(Date joinDate){
         this.joinDate = joinDate;
     }
-    public Date getJoinDate(){
-        return this.joinDate;
+
+    public Set<Ship> getShips() {
+        return this.ships;
+    }
+
+    //deprecado???
+    public void addShip(Ship ship){
+        ship.setGamePlayer(this);
+        ships.add(ship);
     }
 
     public long getId() {
         return id;
+    }
+
+    public Map<String, Object> makeGamePlayerDTO(){
+        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        dto.put("id", this.getId());
+        dto.put("player", this.getPlayer().makePlayerDTO());
+        return dto;
     }
 }

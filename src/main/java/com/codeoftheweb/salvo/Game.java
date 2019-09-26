@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -51,4 +50,32 @@ public class Game {
     public long getId() {
         return id;
     }
+
+    public Map<String, Object> makeGameDTO() {
+        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        dto.put("id", this.getId());
+        dto.put("created", this.getCreationDate());
+        dto.put("gamePlayers",  this.getGamePlayers()
+                .stream()
+                .map(gamePlayer -> gamePlayer.makeGamePlayerDTO())
+                .collect(Collectors.toList())
+        );
+        return dto;
+    }
+
+    public Map<String, Object> makeGameViewDTO(Long nn) {
+        Map<String, Object> dto = this.makeGameDTO();
+        dto.put("ships", this.getShips(nn));
+        return dto;
+    }
+
+    public List<Object> getShips(Long nn){
+        return this.getGamePlayers()
+                                    .stream()
+                                    .filter(gamePlayer -> gamePlayer.getId() == nn)
+                                    .flatMap(gamePlayer -> gamePlayer.getShips().stream())
+                                    .map(ship -> ship.makeShipDTO())
+                                    .collect(toList());
+    }
+
 }
