@@ -42,14 +42,6 @@ public class Game extends  PersistentEntity{
         return gamePlayers.stream().map(gamePlayer -> gamePlayer.getPlayer()).collect(toList());
     }
 
-    public List<Object> getShipsDTO(Long nn){
-        return this.getGamePlayers()
-                .stream()
-                .filter(gamePlayer -> gamePlayer.getId() == nn)
-                .flatMap(gamePlayer -> gamePlayer.getShips().stream())
-                .map(ship -> ship.makeShipDTO())
-                .collect(toList());
-    }
 
     public Map<String, Object> makeGameDTO() {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
@@ -75,6 +67,15 @@ public class Game extends  PersistentEntity{
                 .stream()
                 .flatMap(gamePlayer -> gamePlayer.getSalvoes().stream())
                 .map(salvo -> salvo.makeSalvoDTO())
-                .collect(Collectors.toList());
+                .collect(toList());
+    }
+
+    public List<Object> getShipsDTO(Long nn){
+        return this.getGamePlayers()
+                .stream()
+                .filter(gamePlayer -> gamePlayer.getId() == nn)
+                .flatMap(gamePlayer -> gamePlayer.getShips().stream())
+                .map(ship -> ship.makeShipDTO())
+                .collect(toList());
     }
 }
