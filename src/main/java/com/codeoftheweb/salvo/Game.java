@@ -10,35 +10,17 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @Entity
-public class Game {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
-    private long id;
+public class Game extends  PersistentEntity{
 
     private Date creationDate;
 
     @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
     Set<GamePlayer> gamePlayers;
 
-    public void addGamePlayer(GamePlayer gamePlayer) {
-        gamePlayer.setGame(this);
-        gamePlayers.add(gamePlayer);
-    }
-
-    @JsonIgnore
-    public List<Player> getPlayers() {
-        return gamePlayers.stream().map(gamePlayer -> gamePlayer.getPlayer()).collect(toList());
-    }
-
 
     public Game(){
-        //this.creationDate = new Date();
     }
 
-    public Set<GamePlayer> getGamePlayers() {
-        return gamePlayers;
-    }
 
     public void setCreationDate(Date creationDate){
         this.creationDate = creationDate;
@@ -47,8 +29,26 @@ public class Game {
         return this.creationDate;
     }
 
-    public long getId() {
-        return id;
+    public void addGamePlayer(GamePlayer gamePlayer) {
+        gamePlayer.setGame(this);
+        gamePlayers.add(gamePlayer);
+    }
+    public Set<GamePlayer> getGamePlayers() {
+        return gamePlayers;
+    }
+
+    @JsonIgnore
+    public List<Player> getPlayers() {
+        return gamePlayers.stream().map(gamePlayer -> gamePlayer.getPlayer()).collect(toList());
+    }
+
+    public List<Object> getShipsDTO(Long nn){
+        return this.getGamePlayers()
+                .stream()
+                .filter(gamePlayer -> gamePlayer.getId() == nn)
+                .flatMap(gamePlayer -> gamePlayer.getShips().stream())
+                .map(ship -> ship.makeShipDTO())
+                .collect(toList());
     }
 
     public Map<String, Object> makeGameDTO() {
@@ -65,17 +65,16 @@ public class Game {
 
     public Map<String, Object> makeGameViewDTO(Long nn) {
         Map<String, Object> dto = this.makeGameDTO();
-        dto.put("ships", this.getShips(nn));
+        dto.put("ships", this.getShipsDTO(nn));
+        dto.put("salvoes", this.getSalvoesDTO());
         return dto;
     }
 
-    public List<Object> getShips(Long nn){
+    public List<Object> getSalvoesDTO(){
         return this.getGamePlayers()
-                                    .stream()
-                                    .filter(gamePlayer -> gamePlayer.getId() == nn)
-                                    .flatMap(gamePlayer -> gamePlayer.getShips().stream())
-                                    .map(ship -> ship.makeShipDTO())
-                                    .collect(toList());
+                .stream()
+                .flatMap(gamePlayer -> gamePlayer.getSalvoes().stream())
+                .map(salvo -> salvo.makeSalvoDTO())
+                .collect(Collectors.toList());
     }
-
 }

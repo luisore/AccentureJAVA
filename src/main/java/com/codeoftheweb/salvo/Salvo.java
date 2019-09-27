@@ -3,30 +3,30 @@ package com.codeoftheweb.salvo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
-public class Ship extends PersistentEntity{
+public class Salvo extends PersistentEntity{
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="gamePlayer_id")
     private GamePlayer gamePlayer;
 
-    private String type;
+    private Integer turn;
 
     @ElementCollection
-    @CollectionTable(name = "ship_locations", joinColumns = @JoinColumn(name = "ship_id"))
-    @Column(name = "ship_location")
+    @CollectionTable(name = "salvo_locations", joinColumns = @JoinColumn(name = "salvo_id"))
+    @Column(name = "salvo_location")
     private Set<String> locations;
 
-    public Ship(){}
-    public Ship(String type,Set<String> locations){
-        this.type = type;
-        this.locations = locations;
-    }
-    public Ship(GamePlayer gamePlayer,String type,Set<String> locations){
+    public Salvo(){}
+
+    public Salvo(Integer turn, GamePlayer gamePlayer, Set<String> locations) {
+        this.turn = turn;
         this.gamePlayer = gamePlayer;
-        this.type = type;
         this.locations = locations;
     }
 
@@ -38,17 +38,17 @@ public class Ship extends PersistentEntity{
         this.gamePlayer = gamePlayer;
     }
 
-    public String getType() {
-        return type;
+    public Integer getTurn() {
+        return turn;
     }
-
     public Set<String> getLocations() {
         return locations;
     }
 
-    public Map<String, Object> makeShipDTO(){
-        Map<String, Object> dto = new LinkedHashMap<String, Object>();
-        dto.put("type", this.getType());
+    public Map<String, Object> makeSalvoDTO() {
+        Map<String, Object> dto = new LinkedHashMap<>();
+        dto.put("turn", this.getTurn());
+        dto.put("player", this.getGamePlayer().getPlayer().getId());
         dto.put("locations", this.getLocations());
         return dto;
     }

@@ -12,11 +12,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 
 @Entity
-public class Player {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
-    private long id;
+public class Player extends PersistentEntity{
 
     private String userName;
     private String email;
@@ -26,22 +22,7 @@ public class Player {
     Set<GamePlayer> gamePlayers;
 
 
-    public void addGamePlayer(GamePlayer gamePlayer) {
-        gamePlayer.setPlayer(this);
-        gamePlayers.add(gamePlayer);
-    }
-
-    @JsonIgnore
-    public List<Game> getGames() {
-        return gamePlayers.stream().map(gamePlayer -> gamePlayer.getGame()).collect(toList());
-    }
-
     public Player(){}
-
-    /*public Player(String email){
-        this.email = email;
-    }*/
-
     public Player(String userName, String email, String password){
         this.userName = userName;
         this.email = email;
@@ -49,9 +30,15 @@ public class Player {
     }
 
 
-    public String getUserName() {
-        return userName;
+    public void addGamePlayer(GamePlayer gamePlayer) {
+        gamePlayer.setPlayer(this);
+        gamePlayers.add(gamePlayer);
     }
+    @JsonIgnore
+    public List<Game> getGames() {
+        return gamePlayers.stream().map(gamePlayer -> gamePlayer.getGame()).collect(toList());
+    }
+
     public String getEmail() {
         return email;
     }
@@ -61,10 +48,6 @@ public class Player {
     }
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public long getId() {
-        return id;
     }
 
     public Map<String, Object> makePlayerDTO(){

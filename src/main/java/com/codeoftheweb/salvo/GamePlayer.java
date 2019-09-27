@@ -8,11 +8,7 @@ import javax.persistence.*;
 import java.util.*;
 
 @Entity
-public class GamePlayer {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
-    private long id;
+public class GamePlayer extends PersistentEntity{
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="player_id")
@@ -22,9 +18,11 @@ public class GamePlayer {
     @JoinColumn(name="game_id")
     private Game game;
 
-
     @OneToMany(mappedBy="gamePlayer", fetch=FetchType.EAGER)
     private Set<Ship> ships;
+
+    @OneToMany(mappedBy="gamePlayer", fetch=FetchType.EAGER)
+    private Set<Salvo> salvoes;
 
     private Date joinDate;
 
@@ -34,6 +32,8 @@ public class GamePlayer {
         this.game = game;
         this.player = player;
         this.joinDate = joinDate;
+        this.ships = new HashSet<>();
+        this.salvoes = new HashSet<>();
     }
 
     public Player getPlayer() {
@@ -62,14 +62,18 @@ public class GamePlayer {
         return this.ships;
     }
 
-    //deprecado???
+    public Set<Salvo> getSalvoes() {
+        return salvoes;
+    }
+
     public void addShip(Ship ship){
         ship.setGamePlayer(this);
         ships.add(ship);
     }
 
-    public long getId() {
-        return id;
+    public void addSalvo(Salvo salvo){
+        salvo.setGamePlayer(this);
+        salvoes.add(salvo);
     }
 
     public Map<String, Object> makeGamePlayerDTO(){
