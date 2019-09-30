@@ -1,7 +1,7 @@
-package com.codeoftheweb.salvo;
+package com.codeoftheweb.salvo.models;
 
+import com.codeoftheweb.salvo.PersistentEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.*;
@@ -10,12 +10,15 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @Entity
-public class Game extends  PersistentEntity{
+public class Game extends PersistentEntity {
 
     private Date creationDate;
 
     @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
     Set<GamePlayer> gamePlayers;
+
+    @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
+    private Set<Score> scores;
 
 
     public Game(){
@@ -37,6 +40,8 @@ public class Game extends  PersistentEntity{
         return gamePlayers;
     }
 
+
+
     @JsonIgnore
     public List<Player> getPlayers() {
         return gamePlayers.stream().map(gamePlayer -> gamePlayer.getPlayer()).collect(toList());
@@ -49,7 +54,7 @@ public class Game extends  PersistentEntity{
         dto.put("created", this.getCreationDate());
         dto.put("gamePlayers",  this.getGamePlayers()
                 .stream()
-                .map(gamePlayer -> gamePlayer.makeGamePlayerDTO())
+                .map(GamePlayer::makeGamePlayerDTO)
                 .collect(Collectors.toList())
         );
         return dto;
@@ -57,25 +62,25 @@ public class Game extends  PersistentEntity{
 
     public Map<String, Object> makeGameViewDTO(Long nn) {
         Map<String, Object> dto = this.makeGameDTO();
-        dto.put("ships", this.getShipsDTO(nn));
-        dto.put("salvoes", this.getSalvoesDTO());
+        dto.put("ships", this.makeShipsDTO(nn));
+        dto.put("salvoes", this.makeSalvoesDTO());
         return dto;
     }
 
-    public List<Object> getSalvoesDTO(){
+    public List<Object> makeSalvoesDTO(){
         return this.getGamePlayers()
                 .stream()
                 .flatMap(gamePlayer -> gamePlayer.getSalvoes().stream())
-                .map(salvo -> salvo.makeSalvoDTO())
+                .map(Salvo::makeSalvoDTO)
                 .collect(toList());
     }
 
-    public List<Object> getShipsDTO(Long nn){
+    public List<Object> makeShipsDTO(Long nn){
         return this.getGamePlayers()
                 .stream()
                 .filter(gamePlayer -> gamePlayer.getId() == nn)
                 .flatMap(gamePlayer -> gamePlayer.getShips().stream())
-                .map(ship -> ship.makeShipDTO())
+                .map(Ship::makeShipDTO)
                 .collect(toList());
     }
 }

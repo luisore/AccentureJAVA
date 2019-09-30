@@ -1,14 +1,14 @@
-package com.codeoftheweb.salvo;
+package com.codeoftheweb.salvo.models;
 
+import com.codeoftheweb.salvo.PersistentEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
-public class GamePlayer extends PersistentEntity{
+public class GamePlayer extends PersistentEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="player_id")
@@ -76,10 +76,19 @@ public class GamePlayer extends PersistentEntity{
         salvoes.add(salvo);
     }
 
+    public Optional<Score> getScore(){
+        return this.getPlayer().getScore(this.getGame());
+    }
+
     public Map<String, Object> makeGamePlayerDTO(){
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
         dto.put("id", this.getId());
         dto.put("player", this.getPlayer().makePlayerDTO());
+
+        if (this.getScore().isPresent()){
+            dto.put("score", this.getScore().get().makeScoreDTO());
+        }
+
         return dto;
     }
 }

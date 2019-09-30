@@ -1,5 +1,7 @@
 package com.codeoftheweb.salvo;
 
+import com.codeoftheweb.salvo.models.*;
+import com.codeoftheweb.salvo.repositories.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,10 +20,11 @@ public class SalvoApplication {
 
 	@Bean
 	public CommandLineRunner initData(PlayerRepository playerRepository,
-									  GameRepository gameRepository,
-									  GamePlayerRepository gamePlayerRepository,
-									  ShipRepository shipRepository,
-									  SalvoRepository salvoRepository) {
+                                      GameRepository gameRepository,
+                                      GamePlayerRepository gamePlayerRepository,
+                                      ShipRepository shipRepository,
+                                      SalvoRepository salvoRepository,
+                                      ScoreRepository scoreRepository) {
 		return (args) -> {
 			// save a couple of Players
 
@@ -41,32 +44,41 @@ public class SalvoApplication {
 			Game game7 = new Game();
 			Game game8 = new Game();
 
-			Date creationDate = new Date();
-			game1.setCreationDate(creationDate);
-			game2.setCreationDate(Date.from(creationDate.toInstant().plusSeconds(3600)));
-			game3.setCreationDate(Date.from(creationDate.toInstant().plusSeconds(7200)));
-			game4.setCreationDate(Date.from(creationDate.toInstant().plusSeconds(10800)));
-			game5.setCreationDate(Date.from(creationDate.toInstant().plusSeconds(14400)));
-			game6.setCreationDate(Date.from(creationDate.toInstant().plusSeconds(18000)));
-			game7.setCreationDate(Date.from(creationDate.toInstant().plusSeconds(21600)));
-			game8.setCreationDate(Date.from(creationDate.toInstant().plusSeconds(25200)));
+			Date d1 = new Date();
+			Date d2 = Date.from(d1.toInstant().plusSeconds(3600));
+            Date d3 = Date.from(d1.toInstant().plusSeconds(7200));
+            Date d4 = Date.from(d1.toInstant().plusSeconds(10800));
+            Date d5 = Date.from(d1.toInstant().plusSeconds(14400));
+            Date d6 = Date.from(d1.toInstant().plusSeconds(18000));
+            Date d7 = Date.from(d1.toInstant().plusSeconds(21600));
+            Date d8 = Date.from(d1.toInstant().plusSeconds(25200));
+
+			game1.setCreationDate(d1);
+			game2.setCreationDate(d2);
+			game3.setCreationDate(d3);
+			game4.setCreationDate(d4);
+			game5.setCreationDate(d5);
+			game6.setCreationDate(d6);
+			game7.setCreationDate(d7);
+			game8.setCreationDate(d8);
+
 			gameRepository.saveAll(Arrays.asList(game1,game2,game3,game4,game5,game6,game7,game8));
 
 
-			GamePlayer gp1 = new GamePlayer(creationDate,game1,player1);
-			GamePlayer gp2 = new GamePlayer(creationDate,game1,player2);
-			GamePlayer gp3 = new GamePlayer(creationDate,game2,player1);
-			GamePlayer gp4 = new GamePlayer(creationDate,game2,player2);
-			GamePlayer gp5 = new GamePlayer(creationDate,game3,player2);
-			GamePlayer gp6 = new GamePlayer(creationDate,game3,player4);
-			GamePlayer gp7 = new GamePlayer(creationDate,game4,player2);
-			GamePlayer gp8 = new GamePlayer(creationDate,game4,player1);
-			GamePlayer gp9 = new GamePlayer(creationDate,game5,player4);
-			GamePlayer gp10 = new GamePlayer(creationDate,game5,player1);
-			GamePlayer gp11 = new GamePlayer(creationDate,game6,player3);
-			GamePlayer gp12 = new GamePlayer(creationDate,game7,player4);
-			GamePlayer gp13 = new GamePlayer(creationDate,game8,player3);
-			GamePlayer gp14 = new GamePlayer(creationDate,game8,player4);
+			GamePlayer gp1 = new GamePlayer(d1,game1,player1);
+			GamePlayer gp2 = new GamePlayer(d1,game1,player2);
+			GamePlayer gp3 = new GamePlayer(d1,game2,player1);
+			GamePlayer gp4 = new GamePlayer(d1,game2,player2);
+			GamePlayer gp5 = new GamePlayer(d1,game3,player2);
+			GamePlayer gp6 = new GamePlayer(d1,game3,player4);
+			GamePlayer gp7 = new GamePlayer(d1,game4,player2);
+			GamePlayer gp8 = new GamePlayer(d1,game4,player1);
+			GamePlayer gp9 = new GamePlayer(d1,game5,player4);
+			GamePlayer gp10 = new GamePlayer(d1,game5,player1);
+			GamePlayer gp11 = new GamePlayer(d1,game6,player3);
+			GamePlayer gp12 = new GamePlayer(d1,game7,player4);
+			GamePlayer gp13 = new GamePlayer(d1,game8,player3);
+			GamePlayer gp14 = new GamePlayer(d1,game8,player4);
 
 			gamePlayerRepository.saveAll(Arrays.asList(gp1,gp2,gp3,gp4,gp5,gp6,gp7,gp8,gp9,gp10,gp11,gp12,gp13,gp14));
 
@@ -131,9 +143,20 @@ public class SalvoApplication {
 					sa11, sa12, sa13, sa14, sa15, sa16, sa17, sa18, sa19, sa20, sa21));
 
 
+            Score sc1 = new Score(game1, player1, 1.0, d2);
+            Score sc2 = new Score(game1, player2, 0.0, d2);
+            Score sc3 = new Score(game2, player1, 0.5, d3);
+            Score sc4 = new Score(game2, player2, 0.5, d3);
+            Score sc5 = new Score(game3, player2, 1.0, d4);
+            Score sc6 = new Score(game3, player4, 0.0, d4);
+            Score sc7 = new Score(game4, player4, 0.5, d5);
+            Score sc8 = new Score(game4, player1, 0.5, d5);
+
+            scoreRepository.saveAll(Arrays.asList(sc1, sc2, sc3, sc4, sc5, sc6, sc7, sc8));
 
 
-		};
+
+        };
 	}
 
 

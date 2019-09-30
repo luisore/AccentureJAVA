@@ -1,15 +1,16 @@
-package com.codeoftheweb.salvo;
+package com.codeoftheweb.salvo.models;
 
+import com.codeoftheweb.salvo.PersistentEntity;
+import com.codeoftheweb.salvo.models.GamePlayer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @Entity
-public class Salvo extends PersistentEntity{
+public class Salvo extends PersistentEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="gamePlayer_id")

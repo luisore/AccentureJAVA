@@ -1,5 +1,10 @@
-package com.codeoftheweb.salvo;
+package com.codeoftheweb.salvo.controllers;
 
+import com.codeoftheweb.salvo.models.Game;
+import com.codeoftheweb.salvo.models.Player;
+import com.codeoftheweb.salvo.repositories.GamePlayerRepository;
+import com.codeoftheweb.salvo.repositories.GameRepository;
+import com.codeoftheweb.salvo.repositories.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +29,7 @@ public class SalvoController {
     public List<Object> getGames() {
         return gameRepository.findAll()
                                 .stream()
-                                .map(game -> game.makeGameDTO())
+                                .map(Game::makeGameDTO)
                                 .collect(Collectors.toList());
     }
 
@@ -38,4 +43,11 @@ public class SalvoController {
         return gamePlayerRepository.findById(nn).get().getGame().makeGameViewDTO(nn);
     }
 
+    @RequestMapping("/leaderBoard")
+    public List<Object> getLeaderBoard(){
+        return playerRepository.findAll()
+                                .stream()
+                                .map(Player::makeLeaderBoardDTO)
+                                .collect(Collectors.toList());
+    }
 }
