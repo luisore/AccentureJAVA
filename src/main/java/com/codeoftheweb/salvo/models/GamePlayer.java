@@ -36,6 +36,7 @@ public class GamePlayer extends PersistentEntity {
         this.salvoes = new HashSet<>();
     }
 
+    @JsonIgnore
     public Player getPlayer() {
         return player;
     }
@@ -85,10 +86,11 @@ public class GamePlayer extends PersistentEntity {
         dto.put("id", this.getId());
         dto.put("player", this.getPlayer().makePlayerDTO());
 
+/*comento porque en Game retorno una entidad ScoreDTO afuera de los detalles de GameplayerDTO
         if (this.getScore().isPresent()){
             dto.put("score", this.getScore().get().makeScoreDTO());
         }
-
+*/
         return dto;
     }
 }

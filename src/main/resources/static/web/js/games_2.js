@@ -12,7 +12,7 @@ function updateViewGames(data) {
 
 function updateViewLBoard(data) {
   var htmlList = data.map(function (score) {
-      return  '<tr><td>' + score.userName + '</td>'
+      return  '<tr><td>' + score.email + '</td>'
               + '<td>' + score.score.total + '</td>'
               + '<td>' + score.score.won + '</td>'
               + '<td>' + score.score.lost + '</td>'
@@ -32,7 +32,7 @@ function loadData() {
   
   $.get("/api/leaderBoard")
     .done(function(data) {
-        console.log(data)
+        console.log(data);
       updateViewLBoard(data);
     })
     .fail(function( jqXHR, textStatus ) {

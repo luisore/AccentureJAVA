@@ -33,6 +33,7 @@ function loadData() {
         if (playerInfo[0].id === salvo.player) {
           salvo.locations.forEach(function (location) {
             $('#S_' + location).addClass('salvo-piece');
+              $('#S_' + location).text(salvo.turn);
           });
         } else {
           salvo.locations.forEach(function (location) {

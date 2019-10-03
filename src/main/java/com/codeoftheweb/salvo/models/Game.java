@@ -15,15 +15,13 @@ public class Game extends PersistentEntity {
     private Date creationDate;
 
     @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
-    Set<GamePlayer> gamePlayers;
+    private Set<GamePlayer> gamePlayers;
 
     @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
     private Set<Score> scores;
 
-
     public Game(){
     }
-
 
     public void setCreationDate(Date creationDate){
         this.creationDate = creationDate;
@@ -40,11 +38,13 @@ public class Game extends PersistentEntity {
         return gamePlayers;
     }
 
-
+    public Set<Score> getScores() {
+        return scores;
+    }
 
     @JsonIgnore
     public List<Player> getPlayers() {
-        return gamePlayers.stream().map(gamePlayer -> gamePlayer.getPlayer()).collect(toList());
+        return gamePlayers.stream().map(GamePlayer::getPlayer).collect(toList());
     }
 
 
@@ -57,6 +57,11 @@ public class Game extends PersistentEntity {
                 .map(GamePlayer::makeGamePlayerDTO)
                 .collect(Collectors.toList())
         );
+        dto.put("scores", this.getScores()
+                .stream()
+                .map(Score::makeScoreDTO)
+                .collect(Collectors.toList())
+        );
         return dto;
     }
 
@@ -67,7 +72,7 @@ public class Game extends PersistentEntity {
         return dto;
     }
 
-    public List<Object> makeSalvoesDTO(){
+    private List<Object> makeSalvoesDTO(){
         return this.getGamePlayers()
                 .stream()
                 .flatMap(gamePlayer -> gamePlayer.getSalvoes().stream())
@@ -75,7 +80,7 @@ public class Game extends PersistentEntity {
                 .collect(toList());
     }
 
-    public List<Object> makeShipsDTO(Long nn){
+    private List<Object> makeShipsDTO(Long nn){
         return this.getGamePlayers()
                 .stream()
                 .filter(gamePlayer -> gamePlayer.getId() == nn)

@@ -60,7 +60,7 @@ public class Score extends PersistentEntity {
 
     public Map<String, Object> makeScoreDTO() {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
-        dto.put("id", this.getId());
+        dto.put("player", this.getPlayer().getId());
         dto.put("score", this.getScoreValue());
         dto.put("finishDate", this.getFinishDate());
 

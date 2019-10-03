@@ -23,6 +23,10 @@ public class Player extends PersistentEntity {
 
 
     public Player(){}
+    public Player(String email, String password){
+        this.email = email;
+        this.password = password;
+    }
     public Player(String userName, String email, String password){
         this.userName = userName;
         this.email = email;
@@ -69,7 +73,7 @@ public class Player extends PersistentEntity {
     public Map<String, Object> makePlayerDTO(){
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
         dto.put("id", this.getId());
-        dto.put("userName", this.getEmail());
+        dto.put("email", this.getEmail());
         return dto;
     }
 
