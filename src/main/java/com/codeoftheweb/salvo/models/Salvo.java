@@ -21,14 +21,14 @@ public class Salvo extends PersistentEntity {
     @ElementCollection
     @CollectionTable(name = "salvo_locations", joinColumns = @JoinColumn(name = "salvo_id"))
     @Column(name = "salvo_location")
-    private Set<String> locations;
+    private Set<String> salvoLocations;
 
     public Salvo(){}
 
     public Salvo(Integer turn, GamePlayer gamePlayer, Set<String> locations) {
         this.turn = turn;
         this.gamePlayer = gamePlayer;
-        this.locations = locations;
+        this.salvoLocations = locations;
     }
 
     @JsonIgnore
@@ -43,7 +43,7 @@ public class Salvo extends PersistentEntity {
         return turn;
     }
     public Set<String> getLocations() {
-        return locations;
+        return salvoLocations;
     }
 
     public Map<String, Object> makeSalvoDTO() {

@@ -23,6 +23,10 @@ public class Game extends PersistentEntity {
     public Game(){
     }
 
+    public Game(Date date){
+        this.creationDate = date;
+    }
+
     public void setCreationDate(Date creationDate){
         this.creationDate = creationDate;
     }
@@ -32,6 +36,7 @@ public class Game extends PersistentEntity {
 
     public void addGamePlayer(GamePlayer gamePlayer) {
         gamePlayer.setGame(this);
+        gamePlayer.setJoinDate(new Date());
         gamePlayers.add(gamePlayer);
     }
     public Set<GamePlayer> getGamePlayers() {
@@ -47,6 +52,11 @@ public class Game extends PersistentEntity {
         return gamePlayers.stream().map(GamePlayer::getPlayer).collect(toList());
     }
 
+    public boolean isFull(){return this.getGamePlayers().size() >= 2;}
+
+    public boolean contieneJugador(Player player){
+        return this.getPlayers().stream().anyMatch(player1 -> player1.equals(player));
+    }
 
     public Map<String, Object> makeGameDTO() {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();

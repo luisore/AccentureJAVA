@@ -28,6 +28,10 @@ public class GamePlayer extends PersistentEntity {
 
     public GamePlayer(){}
 
+    public GamePlayer(Player player){
+        this.player = player;
+    }
+
     public GamePlayer(Date joinDate,Game game, Player player) {
         this.game = game;
         this.player = player;

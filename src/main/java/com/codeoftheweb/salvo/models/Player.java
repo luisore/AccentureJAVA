@@ -116,4 +116,21 @@ public class Player extends PersistentEntity {
                 .mapToDouble(Score::getScoreValue)
                 .sum();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(userName, player.userName) &&
+                email.equals(player.email) &&
+                Objects.equals(password, player.password) &&
+                Objects.equals(gamePlayers, player.gamePlayers) &&
+                Objects.equals(scores, player.scores);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userName, email, password, gamePlayers, scores);
+    }
 }

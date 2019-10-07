@@ -126,7 +126,7 @@ $('#createGame').on('submit', function (event) {
 
         })
         .always(function () {
-
+            console.log(data);
         });
 });
 
@@ -228,7 +228,7 @@ function showGamesTable(gamesData) {
             .done(function (data) {
                 console.log(data);
                 console.log("game joined");
-                gameViewUrl = "/web/game_2.html?gp=" + data.gpid;
+                gameViewUrl = "/web/game.html?gp=" + data.gpid;
                 $('#gameJoinedSuccess').show("slow").delay(2000).hide("slow");
                 setTimeout(
                    function()
@@ -238,6 +238,7 @@ function showGamesTable(gamesData) {
             })
             .fail(function (data) {
                 console.log("game join failed");
+                console.log(data);
                 $('#errorSignup').text(data.responseJSON.error);
                 $('#errorSignup').show("slow").delay(4000).hide("slow");
 

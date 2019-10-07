@@ -19,17 +19,17 @@ public class Ship extends PersistentEntity {
     @ElementCollection
     @CollectionTable(name = "ship_locations", joinColumns = @JoinColumn(name = "ship_id"))
     @Column(name = "ship_location")
-    private Set<String> locations;
+    private Set<String> shipLocations;
 
     public Ship(){}
     public Ship(String type,Set<String> locations){
         this.type = type;
-        this.locations = locations;
+        this.shipLocations = locations;
     }
     public Ship(GamePlayer gamePlayer,String type,Set<String> locations){
         this.gamePlayer = gamePlayer;
         this.type = type;
-        this.locations = locations;
+        this.shipLocations = locations;
     }
 
     @JsonIgnore
@@ -45,7 +45,7 @@ public class Ship extends PersistentEntity {
     }
 
     public Set<String> getLocations() {
-        return locations;
+        return shipLocations;
     }
 
     public Map<String, Object> makeShipDTO(){
