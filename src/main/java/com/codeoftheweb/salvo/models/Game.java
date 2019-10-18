@@ -43,8 +43,32 @@ public class Game extends PersistentEntity {
         return gamePlayers;
     }
 
+    private GamePlayer getGamePlayer(Long gamePlayerId){
+        return this.getGamePlayers().stream()
+                .filter(gamePlayer -> gamePlayer.getId() == gamePlayerId)
+                .findFirst().get();
+    }
+
+    public Optional<GamePlayer> getOpponentGamePlayer(GamePlayer gamePlayer){
+        return this.getGamePlayers().stream()
+                .filter(gp -> !gp.equals(gamePlayer))
+                .findFirst();
+    }
+
+    private Optional<GamePlayer> getOpponentGamePlayer(Long gamePlayerId) {
+        return this.getOpponentGamePlayer(getGamePlayer(gamePlayerId));
+    }
+
     public Set<Score> getScores() {
         return scores;
+    }
+    public void addScore(Score score){this.scores.add(score);}
+
+    private void createAndAddScore(Player player, Double scoreValue){
+        Score score = new Score( this, player, scoreValue, new Date());
+
+        player.addScore(score);
+        this.addScore(score);
     }
 
     @JsonIgnore
@@ -52,50 +76,141 @@ public class Game extends PersistentEntity {
         return gamePlayers.stream().map(GamePlayer::getPlayer).collect(toList());
     }
 
+    @JsonIgnore
+    public List<Salvo> getTotalSalvoes() {
+        return this.getGamePlayers()
+                .stream()
+                .flatMap(gamePlayer -> gamePlayer.getSalvoes().stream())
+                .collect(Collectors.toList());
+    }
+
     public boolean isFull(){return this.getGamePlayers().size() >= 2;}
 
-    public boolean contieneJugador(Player player){
-        return this.getPlayers().stream().anyMatch(player1 -> player1.equals(player));
+    public boolean contieneJugador(Player jugadorBuscado){
+        return this.getPlayers().stream().anyMatch(player -> player.equals(jugadorBuscado));
     }
 
     public Map<String, Object> makeGameDTO() {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
         dto.put("id", this.getId());
         dto.put("created", this.getCreationDate());
-        dto.put("gamePlayers",  this.getGamePlayers()
-                .stream()
-                .map(GamePlayer::makeGamePlayerDTO)
-                .collect(Collectors.toList())
-        );
-        dto.put("scores", this.getScores()
-                .stream()
-                .map(Score::makeScoreDTO)
-                .collect(Collectors.toList())
-        );
+        dto.put("gamePlayers", makeGamePlayersDTO());
+        dto.put("scores", makeScoresDTO());
         return dto;
     }
 
-    public Map<String, Object> makeGameViewDTO(Long nn) {
-        Map<String, Object> dto = this.makeGameDTO();
-        dto.put("ships", this.makeShipsDTO(nn));
+    private List<Map<String, Object>> makeScoresDTO() {
+        return this.getScores()
+                .stream()
+                .map(Score::makeScoreDTO)
+                .collect(Collectors.toList());
+    }
+
+    private List<Map<String, Object>> makeGamePlayersDTO() {
+        return this.getGamePlayers()
+                .stream()
+                .map(GamePlayer::makeGamePlayerDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Map<String, Object> makeGameViewDTO(Long gamePlayerId) {
+        GamePlayer gamePlayer = this.getGamePlayer(gamePlayerId);
+
+        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        dto.put("id", this.getId());
+        dto.put("created", this.getCreationDate());
+        dto.put("gameState", gamePlayer.getGameState());
+        dto.put("gamePlayers", makeGamePlayersDTO());
+        dto.put("ships", this.makeShipsDTO(gamePlayer));
         dto.put("salvoes", this.makeSalvoesDTO());
+
+        Map<String, Object> totalHitsDTO = new LinkedHashMap<>();
+        totalHitsDTO.put("self", getHitsDTOList(getOpponentGamePlayer(gamePlayer)));
+        totalHitsDTO.put("opponent", getHitsDTOList(gamePlayer));
+
+        dto.put("hits", totalHitsDTO);
         return dto;
+    }
+
+    private List<Map<String, Object>> getHitsDTOList(Optional<GamePlayer> gamePlayer){
+        if(!gamePlayer.isPresent()){
+            return new LinkedList<>();
+        }
+        return getHitsDTOList(gamePlayer.get());
+    }
+    private List<Map<String, Object>> getHitsDTOList(GamePlayer gamePlayer) {
+        //si no tengo oponente, si mi oponente no tiene barcos, si no tengo salvos, no hagas el analisis
+        if(     !this.getOpponentGamePlayer(gamePlayer).isPresent()
+                || this.getOpponentGamePlayer(gamePlayer).get().getShips().isEmpty()
+                || gamePlayer.getSalvoes().isEmpty()){
+            return new LinkedList<>();
+        }
+
+        Set<Ship> opponentShips = this.getOpponentGamePlayer(gamePlayer).get().getShips();
+        List<Map<String, Object>> turnAnalysisDTOList =     gamePlayer
+                                                            .getSalvoes()
+                                                            .stream()
+                                                            .sorted(Comparator.comparing(Salvo::getTurn))
+                                                            .map(salvo -> salvo.makeTurnAnalysisDTO(opponentShips))
+                                                            .collect(Collectors.toList());
+        //Logica para insertar informacion de los Hits agregada
+        Set<String> opponentShipTypes = opponentShips.stream().map(Ship::getNormalizedType).collect(Collectors.toSet());
+        Map<String, Integer> damagesAux = new LinkedHashMap<>();
+        for (Map<String, Object> turnAnalysis : turnAnalysisDTOList){
+            Map<String, Integer> turnAnalysisDamages = (Map<String, Integer>)turnAnalysis.get("damages");
+            for (String shipType : opponentShipTypes){
+                damagesAux.put( shipType ,      ( damagesAux.get(shipType) != null ? damagesAux.get(shipType) : 0 )
+                                                + turnAnalysisDamages.get(shipType + "Hits"));
+            }
+            turnAnalysisDamages.putAll(damagesAux);
+        }
+        return turnAnalysisDTOList;
     }
 
     private List<Object> makeSalvoesDTO(){
-        return this.getGamePlayers()
+        return this.getTotalSalvoes()
                 .stream()
-                .flatMap(gamePlayer -> gamePlayer.getSalvoes().stream())
+                .sorted(Comparator.comparing(Salvo::getTurn))
                 .map(Salvo::makeSalvoDTO)
                 .collect(toList());
     }
 
-    private List<Object> makeShipsDTO(Long nn){
-        return this.getGamePlayers()
+    private List<Object> makeShipsDTO(GamePlayer gamePlayer){
+        return  gamePlayer
+                .getShips()
                 .stream()
-                .filter(gamePlayer -> gamePlayer.getId() == nn)
-                .flatMap(gamePlayer -> gamePlayer.getShips().stream())
                 .map(Ship::makeShipDTO)
                 .collect(toList());
+    }
+    /*TODO: terminar si la validacion de gameover se hace aca o hay que tocar el controller, ver si actualizarScore funciona
+    **aunque en ningun momento persisto en la base de datos
+     */
+    public boolean isOver() {
+        List<GamePlayer> gamePlayersSinBarcos = this.getGamePlayers().stream().filter(GamePlayer::perdioSusBarcos).collect(Collectors.toList());
+
+        /*termino el juego*/
+        return gamePlayersSinBarcos.size() > 0;
+    }
+
+    public Game finishGame(){
+        if (this.isOver()){
+            List<GamePlayer> gamePlayersSinBarcos = this.getGamePlayers().stream().filter(GamePlayer::perdioSusBarcos).collect(Collectors.toList());
+
+            if (gamePlayersSinBarcos.size() == 2 /*empataron ambos jugadores*/){
+                gamePlayersSinBarcos.forEach(gamePlayer ->
+                        createAndAddScore(gamePlayer.getPlayer(),0.5)
+                );
+
+            }else{
+                GamePlayer gamePlayerPerdedor = gamePlayersSinBarcos.get(0);
+
+                Player playerPerdedor = gamePlayerPerdedor.getPlayer();
+                Player playerGanador = gamePlayerPerdedor.getOponente().get().getPlayer();
+
+                createAndAddScore(playerPerdedor,0.0);
+                createAndAddScore(playerGanador,1.0);
+            }
+        }
+        return this;
     }
 }

@@ -50,6 +50,9 @@ public class Player extends PersistentEntity {
     public Set<Score> getScores() {
         return scores;
     }
+    public void addScore(Score score){
+        this.scores.add(score);
+    }
 
     public String getPassword() {
         return password;
@@ -68,8 +71,6 @@ public class Player extends PersistentEntity {
                 .findFirst();
     }
 
-
-
     public Map<String, Object> makePlayerDTO(){
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
         dto.put("id", this.getId());
@@ -78,10 +79,7 @@ public class Player extends PersistentEntity {
     }
 
     public Map<String, Object> makeLeaderBoardDTO(){
-        Map<String, Object> dto = new LinkedHashMap<String, Object>();
-
-        dto.put("id", this.getId());
-        dto.put("email", this.getEmail());
+        Map<String, Object> dto = makePlayerDTO();
 
             Map<String, Object> dto_score = new LinkedHashMap<String, Object>();
             dto_score.put("total", this.getTotalScore());

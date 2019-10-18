@@ -63,7 +63,6 @@ public class Score extends PersistentEntity {
         dto.put("player", this.getPlayer().getId());
         dto.put("score", this.getScoreValue());
         dto.put("finishDate", this.getFinishDate());
-
         return dto;
     }
 
@@ -75,5 +74,12 @@ public class Score extends PersistentEntity {
     }
     public boolean isATie() {
         return this.getScoreValue()==0.5;
+    }
+
+    public String getScoreState(){
+        if (isALoss()){return "LOST";}
+        if (isAWin()){return "WON";}
+        if (isATie()){return "TIE";}
+        return "";
     }
 }

@@ -81,6 +81,21 @@ public class GamePlayer extends PersistentEntity {
         salvoes.add(salvo);
     }
 
+    public Boolean tieneBarcosPuestos(){
+        return (!this.getShips().isEmpty());
+    }
+    private boolean tieneOponente() {
+        return this.getOponente().isPresent();
+    }
+    @JsonIgnore
+    public Optional<GamePlayer> getOponente(){
+        return this.getGame().getOpponentGamePlayer(this);
+    }
+
+    public boolean jugoTurno(int turno){
+        return this.getSalvoes().stream().anyMatch(salvo -> salvo.getTurn() == turno);
+    }
+
     public Optional<Score> getScore(){
         return this.getPlayer().getScore(this.getGame());
     }
@@ -89,12 +104,43 @@ public class GamePlayer extends PersistentEntity {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
         dto.put("id", this.getId());
         dto.put("player", this.getPlayer().makePlayerDTO());
-
-/*comento porque en Game retorno una entidad ScoreDTO afuera de los detalles de GameplayerDTO
-        if (this.getScore().isPresent()){
-            dto.put("score", this.getScore().get().makeScoreDTO());
-        }
-*/
+        dto.put("joinDate",this.getJoinDate());
         return dto;
+    }
+
+    @JsonIgnore
+    public String getGameState() {
+        if (!this.tieneBarcosPuestos()){
+            return "PLACESHIPS";
+        }
+        if(!this.tieneOponente() || !this.getOponente().get().tieneBarcosPuestos()){
+            return "WAITINGFOROPP";
+        }
+        if(!this.getGame().getScores().isEmpty()){
+            return this.getScore().get().getScoreState();
+        }
+        if(this.puedeJugarTurno()){
+            return "PLAY";
+        }
+        if(this.esperaTurnoOponente()){
+            return "WAIT";
+        }
+        return "";
+    }
+
+    private boolean esperaTurnoOponente() {
+        return this.getSalvoes().size() > this.getOponente().get().getSalvoes().size();
+    }
+
+    public boolean puedeJugarTurno() {
+        return this.getSalvoes().size() <= this.getOponente().get().getSalvoes().size();
+    }
+
+    public boolean perdioSusBarcos(){
+        return this.getShips().stream().allMatch(ship -> ship.fueDestruidoPor(this.getOponente().get().getSalvoes()));
+    }
+
+    public int getTurnoActual(){
+        return this.getSalvoes().size();
     }
 }
