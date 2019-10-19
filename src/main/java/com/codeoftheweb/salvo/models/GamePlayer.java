@@ -140,7 +140,7 @@ public class GamePlayer extends PersistentEntity {
         return this.getShips().stream().allMatch(ship -> ship.fueDestruidoPor(this.getOponente().get().getSalvoes()));
     }
 
-    public int getTurnoActual(){
+    public int getNumeroDeTurnoActual(){
         return this.getSalvoes().size();
     }
 }

@@ -154,22 +154,18 @@ public class SalvoController {
         }
         if(!gamePlayer.puedeJugarTurno()){
             return new ResponseEntity<>(makeMap("error", "El usuario ya hizo un salvo para el turno"), HttpStatus.FORBIDDEN);
-        }if(salvo.getSalvoLocations().size()>5 && !loggedPlayer.getEmail().equals("luissk47@gmail.com")){
+        }if(salvo.getSalvoLocations().size()>5){
             return new ResponseEntity<>(makeMap("error", "El usuario no puede poner mas de 5 locaciones por turno"), HttpStatus.FORBIDDEN);
         }
 
-        int nuevoTurnoGamePlayer = gamePlayer.getTurnoActual() + 1;
-        salvo.setTurn(nuevoTurnoGamePlayer);
-        salvo.setGamePlayer(gamePlayer);
-        if (loggedPlayer.getEmail().equals("luissk47@gmail.com")){
-            salvo.addSalvoLocations(gamePlayer.getOponente().get().getShips().stream().flatMap(ship -> ship.getLocations().stream()).collect(Collectors.toSet()));
-        }
+        Game game = gamePlayer.getGame();
+        game.jugarSalvo(gamePlayer,salvo);
 
         salvoRepository.save(salvo);
 
-        if(gamePlayer.getOponente().get().getTurnoActual() == nuevoTurnoGamePlayer){
-            if(gamePlayer.getGame().isOver()){
-                Set<Score> scoresFinales = gamePlayer.getGame().finishGame().getScores();
+        if(game.gamePlayersJugaronUnTurno()){
+            if(game.isOver()){
+                Set<Score> scoresFinales = game.finishGame().getScores();
                 scoreRepository.saveAll(scoresFinales);
             }
         }
